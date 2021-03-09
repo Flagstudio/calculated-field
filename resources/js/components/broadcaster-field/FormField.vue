@@ -2,20 +2,21 @@
   <default-field :field="field" :errors="errors">
     <template slot="field">
       <input
-        :id="field.name"
-        :type="this.field.type"
-        class="w-full form-control form-input form-input-bordered"
-        :class="errorClasses"
-        :placeholder="field.name"
-        :value="value | moneyFormat(field.numberFormat)"
-        @input="setFieldAndMessage"
+          ref="input"
+          :id="field.name"
+          :type="this.field.type"
+          class="w-full form-control form-input form-input-bordered"
+          :class="errorClasses"
+          :placeholder="field.name"
+          :value="value | moneyFormat(field.numberFormat)"
+          @input="setFieldAndMessage"
       />
     </template>
   </default-field>
 </template>
 
 <script>
-import { FormField, HandlesValidationErrors } from "laravel-nova";
+import {FormField, HandlesValidationErrors} from "laravel-nova";
 import numeral from "numeral";
 
 export default {
@@ -25,19 +26,28 @@ export default {
 
   methods: {
     setFieldAndMessage(el) {
-      const rawValue = el.target.value;
+      const rawValue = el.target ? el.target.value : el.value;
       let parsedValue = rawValue;
 
       if (this.field.type === "number") {
         parsedValue = Number(rawValue);
       }
 
-      Nova.$emit(this.field.broadcastTo, {
-        field_name: this.field.attribute,
-        value: parsedValue
-      });
+      if (Array.isArray(this.field.broadcastTo)) {
+        this.emitParsedValue(this.field.broadcastTo[0], parsedValue);
+        this.emitParsedValue(this.field.broadcastTo[1], parsedValue);
+      } else {
+        this.emitParsedValue(this.field.broadcastTo, parsedValue);
+      }
 
       this.value = parsedValue;
+    },
+
+    emitParsedValue(broadcast, value) {
+      Nova.$emit(broadcast, {
+        field_name: this.field.attribute,
+        value,
+      });
     },
 
     /*
