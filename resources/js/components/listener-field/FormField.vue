@@ -52,6 +52,9 @@ export default {
   props: ["resourceName", "resourceId", "field"],
 
   created() {
+    Nova.$on(this.field.listensTo + 'Created', (message) => {
+      this.field_values[message.field_name] = message.value;
+    });
     Nova.$on(this.field.listensTo, this.messageReceived);
     this.field_values["resourceId"] = parseInt(this.resourceId);
   },

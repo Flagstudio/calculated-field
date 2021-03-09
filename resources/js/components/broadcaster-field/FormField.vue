@@ -24,8 +24,20 @@ export default {
 
   props: ["resourceName", "resourceId", "field"],
 
+  mounted() {
+    this.$nextTick(() => {
+      if (Array.isArray(this.field.broadcastTo)) {
+        this.emitParsedValue(this.field.broadcastTo[0] + 'Created', this.value);
+        this.emitParsedValue(this.field.broadcastTo[1] + 'Created', this.value);
+      } else {
+        this.emitParsedValue(this.field.broadcastTo + 'Created', this.value);
+      }
+    });
+  },
+
   methods: {
     setFieldAndMessage(el) {
+      console.log(el);
       const rawValue = el.target ? el.target.value : el.value;
       let parsedValue = rawValue;
 

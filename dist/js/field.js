@@ -27734,8 +27734,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   props: ["resourceName", "resourceId", "field"],
 
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$nextTick(function () {
+      if (Array.isArray(_this.field.broadcastTo)) {
+        _this.emitParsedValue(_this.field.broadcastTo[0] + 'Created', _this.value);
+        _this.emitParsedValue(_this.field.broadcastTo[1] + 'Created', _this.value);
+      } else {
+        _this.emitParsedValue(_this.field.broadcastTo + 'Created', _this.value);
+      }
+    });
+  },
+
+
   methods: {
     setFieldAndMessage: function setFieldAndMessage(el) {
+      console.log(el);
       var rawValue = el.target ? el.target.value : el.value;
       var parsedValue = rawValue;
 
@@ -28497,6 +28512,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   props: ["resourceName", "resourceId", "field"],
 
   created: function created() {
+    var _this = this;
+
+    Nova.$on(this.field.listensTo + 'Created', function (message) {
+      _this.field_values[message.field_name] = message.value;
+    });
     Nova.$on(this.field.listensTo, this.messageReceived);
     this.field_values["resourceId"] = parseInt(this.resourceId);
   },
@@ -28530,15 +28550,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.value = parsedValue;
     },
     calculateValue: function calculateValue() {
-      var _this = this;
+      var _this2 = this;
 
       this.calculating = true;
 
       Nova.request().post("/codebykyle/calculated-field/calculate/" + this.resourceName + "/" + this.field.attribute, this.field_values).then(function (response) {
-        _this.value = response.data.value;
-        _this.calculating = false;
+        _this2.value = response.data.value;
+        _this2.calculating = false;
       }).catch(function () {
-        _this.calculating = false;
+        _this2.calculating = false;
       });
     },
 
